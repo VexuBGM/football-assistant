@@ -7,9 +7,12 @@ CREATE TABLE IF NOT EXISTS Clubs (
 
 CREATE TABLE IF NOT EXISTS Players (
   player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  age INTEGER NOT NULL,
-  position TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  birth_date TEXT NOT NULL,
+  nationality TEXT NOT NULL,
+  position TEXT NOT NULL CHECK(position IN ('GK','DF','MF','FW')),
+  number INTEGER NOT NULL CHECK(number BETWEEN 1 AND 99),
+  status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','injured','suspended','retired')),
   club_id INTEGER NOT NULL,
   FOREIGN KEY (club_id) REFERENCES Clubs(club_id)
 );

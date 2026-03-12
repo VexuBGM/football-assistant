@@ -19,7 +19,7 @@ def add_club(name: str, city: str, founded_year: Optional[int] = None) -> str:
 
     existing = fetch_one("SELECT club_id FROM Clubs WHERE lower(name) = lower(?)", (name_n,))
     if existing is not None:
-        return f"⚠️ Клуб с име „{name_n}“ вече съществува."
+        return f'Club with name "{name_n}" already exists.'
 
     execute(
         "INSERT INTO Clubs (name, city, founded_year) VALUES (?, ?, ?)",
@@ -60,7 +60,7 @@ def delete_club(club_identifier: str) -> str:
         name_n = _normalize_name(ident)
         existing = fetch_one("SELECT club_id FROM Clubs WHERE lower(name) = lower(?)", (name_n,))
         if existing is None:
-            return f"❌ Няма клуб с име „{name_n}“."
+            return f'No club with name "{name_n}".'
         rc = execute("DELETE FROM Clubs WHERE lower(name) = lower(?)", (name_n,))
         return f"✅ Изтрит клуб: {name_n}." if rc > 0 else "❌ Неуспешно изтриване."
 
@@ -84,7 +84,7 @@ def update_club(club_id: int, name: Optional[str] = None, city: Optional[str] = 
         (new_name, club_id),
     )
     if dup is not None:
-        return f"⚠️ Не може: вече има друг клуб с име „{new_name}“."
+        return f'Cannot: another club with name "{new_name}" already exists.'
 
     execute(
         "UPDATE Clubs SET name = ?, city = ?, founded_year = ? WHERE club_id = ?",

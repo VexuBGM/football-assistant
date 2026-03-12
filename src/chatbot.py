@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from . import clubs_service
+from . import players_service
 
 
 @dataclass
@@ -24,7 +25,6 @@ class Chatbot:
 
         self.intents = data.get("intents", [])
 
-        # предварително компилираме regex
         self._compiled = []
         for intent in self.intents:
             tag = intent["tag"]
@@ -36,48 +36,136 @@ class Chatbot:
         for tag, rgx in self._compiled:
             m = rgx.match(t)
             if m:
-                # entities според intent
                 if tag == "add_club":
                     name = m.group(1).strip()
                     city = m.group(2).strip()
                     year = m.group(3)
-                    return ParseResult(tag, {"name": name, "city": city, "founded_year": int(year) if year else None})
+                    return ParseResult(tag, {
+                        "name": name, "city": city,
+                        "founded_year": int(year) if year else None,
+                    })
 
                 if tag == "delete_club":
-                    ident = m.group(1).strip()
-                    return ParseResult(tag, {"identifier": ident})
+                    return ParseResult(tag, {"identifier": m.group(1).strip()})
+
+                if tag == "add_player":
+                    return ParseResult(tag, {
+                        "full_name": m.group(1).strip(),
+                        "club": m.group(2).strip(),
+                        "position": m.group(3).strip(),
+                        "number": int(m.group(4)),
+                        "birth_date": m.group(5).strip(),
+                        "nationality": m.group(6).strip(),
+                    })
+
+                if tag == "list_players":
+                    club = None
+                    for i in range(1, len(m.groups()) + 1):
+                        g = m.group(i)
+                        if g:
+                            club = g.strip()
+                            break
+                    return ParseResult(tag, {"club": club})
+
+                if tag == "update_player_number":
+                    return ParseResult(tag, {
+                        "player_name": m.group(1).strip(),
+                        "number": int(m.group(2)),
+                    })
+
+                if tag == "update_player_position":
+                    return ParseResult(tag, {
+                        "player_name": m.group(1).strip(),
+                        "position": m.group(2).strip(),
+                    })
+
+                if tag == "update_player_status":
+                    return ParseResult(tag, {
+                        "player_name": m.group(1).strip(),
+                        "status": m.group(2).strip(),
+                    })
+
+                if tag == "delete_player":
+                    return ParseResult(tag, {"identifier": m.group(1).strip()})
 
                 return ParseResult(tag, {})
         return ParseResult("unknown", {})
 
     def handle(self, parsed: ParseResult) -> str:
-        if parsed.intent == "help":
-            return (
-                "Команди:\n"
-                "- Добави клуб <име> <град> [година]\n"
-                "- Покажи всички клубове\n"
-                "- Изтрий клуб <име|id>\n"
-                "- помощ\n"
-                "- изход"
-            )
+        tag = parsed.intent
 
-        if parsed.intent == "add_club":
+        if tag == "help":
+            lines = [
+                "Commands:",
+                "=== Clubs ===",
+                "- add club <name> <city> [year]",
+                "- list clubs",
+                "- delete club <name|id>",
+                "=== Players ===",
+                "- add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>",
+                "- list players of <club>  /  list all players",
+                "- change number of <player> to <number>",
+                "- change position of <player> to <position>",
+                "- change status of <player> to <status>",
+                "- delete player <name|id>",
+                "- seed players",
+                "=== Other ===",
+                "- help",
+                "- exit",
+            ]
+            return "\n".join(lines)
+
+        if tag == "add_club":
             return clubs_service.add_club(
                 parsed.entities["name"],
                 parsed.entities["city"],
                 parsed.entities.get("founded_year"),
             )
 
-        if parsed.intent == "list_clubs":
+        if tag == "list_clubs":
             return clubs_service.get_all_clubs()
 
-        if parsed.intent == "delete_club":
+        if tag == "delete_club":
             return clubs_service.delete_club(parsed.entities["identifier"])
 
-        if parsed.intent == "exit":
+        if tag == "add_player":
+            e = parsed.entities
+            return players_service.add_player(
+                e["full_name"], e["club"], e["position"],
+                e["number"], e["birth_date"], e["nationality"],
+            )
+
+        if tag == "list_players":
+            return players_service.list_players(parsed.entities.get("club"))
+
+        if tag == "update_player_number":
+            return players_service.update_player(
+                parsed.entities["player_name"],
+                number=parsed.entities["number"],
+            )
+
+        if tag == "update_player_position":
+            return players_service.update_player(
+                parsed.entities["player_name"],
+                position=parsed.entities["position"],
+            )
+
+        if tag == "update_player_status":
+            return players_service.update_player(
+                parsed.entities["player_name"],
+                status=parsed.entities["status"],
+            )
+
+        if tag == "delete_player":
+            return players_service.delete_player(parsed.entities["identifier"])
+
+        if tag == "seed_players":
+            return players_service.seed_test_data()
+
+        if tag == "exit":
             return "EXIT"
 
-        if parsed.intent == "unknown":
-            return "🤖 Не разбрах. Напиши „помощ“ за списък с команди."
+        if tag == "unknown":
+            return 'I did not understand. Type "help" for a list of commands.'
 
-        return "❌ Вътрешна грешка: непознат intent."
+        return "Internal error: unknown intent."

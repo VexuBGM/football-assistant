@@ -3,9 +3,7 @@
     {
       "tag": "help",
       "patterns": ["^помощ$", "^help$"],
-      "responses": [
-        "Команди:\n- Добави клуб <име> <град> [година]\n- Покажи всички клубове\n- Изтрий клуб <име|id>\n- помощ\n- изход"
-      ]
+      "responses": []
     },
     {
       "tag": "exit",
@@ -18,12 +16,12 @@
         "^добави\\s+клуб\\s+(.+?)\\s+(.+?)(?:\\s+(\\d{4}))?$",
         "^add\\s+club\\s+(.+?)\\s+(.+?)(?:\\s+(\\d{4}))?$"
       ],
-      "responses": [""]
+      "responses": []
     },
     {
       "tag": "list_clubs",
       "patterns": ["^покажи\\s+всички\\s+клубове$", "^list\\s+clubs$"],
-      "responses": [""]
+      "responses": []
     },
     {
       "tag": "delete_club",
@@ -31,7 +29,66 @@
         "^изтрий\\s+клуб\\s+(.+)$",
         "^delete\\s+club\\s+(.+)$"
       ],
-      "responses": [""]
+      "responses": []
+    },
+    {
+      "tag": "add_player",
+      "patterns": [
+        "^добави\\s+играч\\s+(.+?)\\s+в\\s+(.+?)\\s+позиция\\s+(\\w+)\\s+номер\\s+(\\d+)\\s+роден\\s+(\\S+)\\s+нац(?:ионалност)?\\s+(.+)$",
+        "^add\\s+player\\s+(.+?)\\s+in\\s+(.+?)\\s+position\\s+(\\w+)\\s+number\\s+(\\d+)\\s+born\\s+(\\S+)\\s+nat\\s+(.+)$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "list_players",
+      "patterns": [
+        "^покажи\\s+играчи\\s+на\\s+(.+)$",
+        "^покажи\\s+всички\\s+играчи$",
+        "^list\\s+players(?:\\s+of\\s+(.+))?$",
+        "^играчи\\s+на\\s+(.+)$",
+        "^играчи$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "update_player_number",
+      "patterns": [
+        "^смени\\s+номер\\s+на\\s+(.+?)\\s+на\\s+(\\d+)$",
+        "^change\\s+number\\s+of\\s+(.+?)\\s+to\\s+(\\d+)$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "update_player_position",
+      "patterns": [
+        "^смени\\s+позиция\\s+на\\s+(.+?)\\s+на\\s+(\\w+)$",
+        "^change\\s+position\\s+of\\s+(.+?)\\s+to\\s+(\\w+)$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "update_player_status",
+      "patterns": [
+        "^смени\\s+статус\\s+на\\s+(.+?)\\s+на\\s+(\\w+)$",
+        "^change\\s+status\\s+of\\s+(.+?)\\s+to\\s+(\\w+)$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "delete_player",
+      "patterns": [
+        "^изтрий\\s+играч\\s+(.+)$",
+        "^delete\\s+player\\s+(.+)$"
+      ],
+      "responses": []
+    },
+    {
+      "tag": "seed_players",
+      "patterns": [
+        "^зареди\\s+тестови\\s+играчи$",
+        "^seed\\s+players$"
+      ],
+      "responses": []
     }
   ]
 }

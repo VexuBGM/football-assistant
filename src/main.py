@@ -20,8 +20,8 @@ def main():
     init_db()  # зарежда schema.sql ако трябва
     bot = Chatbot()
 
-    print("⚽ Football Clubs Chatbot (ЕТАП 2)")
-    print("Напиши „помощ“ за команди.")
+    print("⚽ Football Chatbot (Stage 3 — Clubs + Players)")
+    print('Type "help" for commands.')
 
     while True:
         user_text = input("> ").strip()
