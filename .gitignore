@@ -3,9 +3,26 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.python-version
 .venv/
 venv/
+
+# Testing / coverage
+.pytest_cache/
+.pytest_tmp/
+.coverage
+.coverage.*
+htmlcov/
+
+# Tooling caches
+.mypy_cache/
+.ruff_cache/
 
 # DB + logs
 football_clubs.db
 commands.log
+
+# Manual test temp dirs
+footballgpt-manual-*/
+footballgpt-bg-manual-*/
+footballgpt-bg-data-*/

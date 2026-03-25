@@ -1,26 +1,13 @@
-# src/main.py
-from datetime import datetime
-import os
-
-from .db import init_db
 from .chatbot import Chatbot
+from .database.db import init_db
+from .utils.logger import log_command
 
 
-def log_command(user_text: str, result: str) -> None:
-    # commands.log в корена на проекта
-    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "commands.log"))
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(log_path, "a", encoding="utf-8") as f:
-        f.write(f"[{ts}] INPUT: {user_text}\n")
-        f.write(f"[{ts}] OUTPUT: {result}\n")
-        f.write("-" * 40 + "\n")
-
-
-def main():
-    init_db()  # зарежда schema.sql ако трябва
+def main() -> None:
+    init_db()
     bot = Chatbot()
 
-    print("⚽ Football Chatbot (Stage 3 — Clubs + Players)")
+    print("Football Chatbot (Stage 4 - Clubs, Players, Transfers)")
     print('Type "help" for commands.')
 
     while True:
@@ -29,11 +16,12 @@ def main():
         result = bot.handle(parsed)
 
         if result == "EXIT":
-            log_command(user_text, "Довиждане!")
-            print("Довиждане!")
+            farewell = "Goodbye!"
+            log_command(user_text, parsed.intent, parsed.entities, farewell)
+            print(farewell)
             break
 
-        log_command(user_text, result)
+        log_command(user_text, parsed.intent, parsed.entities, result)
         print(result)
 
 
