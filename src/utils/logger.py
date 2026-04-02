@@ -16,7 +16,17 @@ def _looks_like_error(message: str) -> bool:
         "internal error",
         "i did not understand",
     )
-    return lowered.startswith(error_prefixes)
+    error_markers = (
+        "already exists",
+        "already loaded",
+        "already added",
+        "вече е",
+        "не съществува",
+        "няма ",
+        "недостатъчно",
+        "не може",
+    )
+    return lowered.startswith(error_prefixes) or any(marker in lowered for marker in error_markers)
 
 
 def _format_params(params: dict[str, Any]) -> str:

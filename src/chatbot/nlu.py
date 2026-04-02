@@ -55,6 +55,28 @@ class RegexNLU:
             if tag == "delete_club":
                 return ParseResult("delete_club", {"identifier": match.group(1).strip()})
 
+            if tag == "create_league":
+                return ParseResult(
+                    "create_league",
+                    {"name": match.group(1).strip(), "season": match.group(2).strip()},
+                )
+
+            if tag in {"add_team_to_league", "remove_team_from_league"}:
+                return ParseResult(
+                    tag,
+                    {
+                        "club": match.group(1).strip(),
+                        "league": match.group(2).strip(),
+                        "season": match.group(3).strip(),
+                    },
+                )
+
+            if tag in {"list_league_teams", "generate_schedule"}:
+                return ParseResult(
+                    tag,
+                    {"league": match.group(1).strip(), "season": match.group(2).strip()},
+                )
+
             if tag == "add_player":
                 return ParseResult(
                     "add_player",

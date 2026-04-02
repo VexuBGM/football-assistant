@@ -1,5 +1,5 @@
 from .models import ParseResult
-from ..services import clubs_service, players_service, transfers_service
+from ..services import clubs_service, leagues_service, players_service, transfers_service
 
 
 class ChatbotRouter:
@@ -14,6 +14,12 @@ class ChatbotRouter:
                     "- add club <name> <city> [year]",
                     "- list clubs",
                     "- delete club <name|id>",
+                    "=== Leagues ===",
+                    "- create league <name> <season>",
+                    "- add team <club> to league <name> <season>",
+                    "- show teams in league <name> <season>",
+                    "- remove team <club> from league <name> <season>",
+                    "- generate schedule <name> <season>",
                     "=== Players ===",
                     "- add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>",
                     "- list players of <club> / list players",
@@ -45,6 +51,35 @@ class ChatbotRouter:
 
         if tag == "delete_club":
             return clubs_service.delete_club(parsed.entities["identifier"])
+
+        if tag == "create_league":
+            return leagues_service.create_league(parsed.entities["name"], parsed.entities["season"])
+
+        if tag == "add_team_to_league":
+            return leagues_service.add_team_to_league(
+                parsed.entities["club"],
+                parsed.entities["league"],
+                parsed.entities["season"],
+            )
+
+        if tag == "list_league_teams":
+            return leagues_service.list_league_teams(
+                parsed.entities["league"],
+                parsed.entities["season"],
+            )
+
+        if tag == "remove_team_from_league":
+            return leagues_service.remove_team_from_league(
+                parsed.entities["club"],
+                parsed.entities["league"],
+                parsed.entities["season"],
+            )
+
+        if tag == "generate_schedule":
+            return leagues_service.generate_schedule(
+                parsed.entities["league"],
+                parsed.entities["season"],
+            )
 
         if tag == "add_player":
             entities = parsed.entities

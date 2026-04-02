@@ -30,6 +30,41 @@
       ]
     },
     {
+      "tag": "create_league",
+      "patterns": [
+        "^създай\\s+лига\\s+(.+?)\\s+(\\d{4}/\\d{4})$",
+        "^create\\s+league\\s+(.+?)\\s+(\\d{4}/\\d{4})$"
+      ]
+    },
+    {
+      "tag": "add_team_to_league",
+      "patterns": [
+        "^добави\\s+отбор\\s+(.+?)\\s+в\\s+лига\\s+(.+?)\\s+(\\d{4}/\\d{4})$",
+        "^add\\s+team\\s+(.+?)\\s+to\\s+league\\s+(.+?)\\s+(\\d{4}/\\d{4})$"
+      ]
+    },
+    {
+      "tag": "list_league_teams",
+      "patterns": [
+        "^покажи\\s+отбори\\s+в\\s+лига\\s+(.+?)\\s+(\\d{4}/\\d{4})$",
+        "^show\\s+teams\\s+in\\s+league\\s+(.+?)\\s+(\\d{4}/\\d{4})$"
+      ]
+    },
+    {
+      "tag": "remove_team_from_league",
+      "patterns": [
+        "^премахни\\s+отбор\\s+(.+?)\\s+от\\s+лига\\s+(.+?)\\s+(\\d{4}/\\d{4})$",
+        "^remove\\s+team\\s+(.+?)\\s+from\\s+league\\s+(.+?)\\s+(\\d{4}/\\d{4})$"
+      ]
+    },
+    {
+      "tag": "generate_schedule",
+      "patterns": [
+        "^генерирай\\s+програма\\s+(.+?)\\s+(\\d{4}/\\d{4})$",
+        "^generate\\s+schedule\\s+(.+?)\\s+(\\d{4}/\\d{4})$"
+      ]
+    },
+    {
       "tag": "add_player",
       "patterns": [
         "^добави\\s+играч\\s+(.+?)\\s+в\\s+(.+?)\\s+позиция\\s+(\\w+)\\s+номер\\s+(\\d+)\\s+роден\\s+(\\S+)\\s+нац(?:ионалност)?\\s+(.+)$",

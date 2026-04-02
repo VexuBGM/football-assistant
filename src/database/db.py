@@ -93,6 +93,14 @@ def _rename_legacy_table(conn: sqlite3.Connection, table_name: str, id_column: s
         conn.execute(f'ALTER TABLE "{table_name}" RENAME TO "{legacy_name}"')
 
 
+def _rename_incompatible_matches_table(conn: sqlite3.Connection) -> None:
+    columns = _column_names(conn, "matches")
+    required_columns = {"id", "league_id", "round_no", "home_club_id", "away_club_id"}
+    backup_name = "matches_pre_stage5"
+    if columns and not required_columns.issubset(columns) and not _table_exists(conn, backup_name):
+        conn.execute(f'ALTER TABLE "matches" RENAME TO "{backup_name}"')
+
+
 def _copy_legacy_data(conn: sqlite3.Connection) -> None:
     if _table_exists(conn, "clubs_legacy"):
         conn.execute(
@@ -122,24 +130,7 @@ def _copy_legacy_data(conn: sqlite3.Connection) -> None:
             """
         )
 
-    if _table_exists(conn, "matches_legacy"):
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO matches (
-              id, home_club_id, away_club_id, match_date, home_score, away_score
-            )
-            SELECT
-              match_id,
-              home_club_id,
-              away_club_id,
-              match_date,
-              home_score,
-              away_score
-            FROM matches_legacy
-            """
-        )
-
-    for legacy_name in ("players_legacy", "matches_legacy", "clubs_legacy"):
+    for legacy_name in ("players_legacy", "clubs_legacy"):
         if _table_exists(conn, legacy_name):
             conn.execute(f'DROP TABLE "{legacy_name}"')
 
@@ -159,6 +150,7 @@ def init_db(schema_path: Optional[str] = None) -> None:
         _rename_legacy_table(conn, "clubs", "club_id", "clubs_legacy")
         _rename_legacy_table(conn, "players", "player_id", "players_legacy")
         _rename_legacy_table(conn, "matches", "match_id", "matches_legacy")
+        _rename_incompatible_matches_table(conn)
         _load_schema(conn, schema_path)
         _copy_legacy_data(conn)
         conn.commit()

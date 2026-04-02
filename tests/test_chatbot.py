@@ -182,6 +182,7 @@ class TestHandleHelp:
         bot = _bot()
         result = bot.handle(bot.parse("help"))
         assert "Clubs" in result
+        assert "Leagues" in result
         assert "Players" in result
 
 
@@ -211,6 +212,47 @@ class TestHandleClubsCRUD:
         bot.handle(bot.parse("add club Levski Sofia 1914"))
         result = bot.handle(bot.parse("delete club Levski"))
         assert "Levski" in result
+
+
+class TestParseLeagues:
+    def test_create_league_en(self):
+        p = _bot().parse("create league Parva Liga 2025/2026")
+        assert p.intent == "create_league"
+        assert p.entities["name"] == "Parva Liga"
+        assert p.entities["season"] == "2025/2026"
+
+    def test_add_team_to_league_en(self):
+        p = _bot().parse("add team Levski Sofia to league Parva Liga 2025/2026")
+        assert p.intent == "add_team_to_league"
+        assert p.entities["club"] == "Levski Sofia"
+        assert p.entities["league"] == "Parva Liga"
+
+    def test_generate_schedule_en(self):
+        p = _bot().parse("generate schedule Parva Liga 2025/2026")
+        assert p.intent == "generate_schedule"
+        assert p.entities["league"] == "Parva Liga"
+
+
+class TestHandleLeagues:
+    def test_create_add_show_and_generate_league(self):
+        bot = _bot()
+        bot.handle(bot.parse("add club Levski Sofia"))
+        bot.handle(bot.parse("add club CSKA Sofia"))
+        bot.handle(bot.parse("add club Ludogorets Razgrad"))
+        bot.handle(bot.parse("add club Botev Plovdiv"))
+
+        create_result = bot.handle(bot.parse("create league Parva Liga 2025/2026"))
+        add_result = bot.handle(bot.parse("add team Levski to league Parva Liga 2025/2026"))
+        bot.handle(bot.parse("add team CSKA to league Parva Liga 2025/2026"))
+        bot.handle(bot.parse("add team Ludogorets to league Parva Liga 2025/2026"))
+        bot.handle(bot.parse("add team Botev to league Parva Liga 2025/2026"))
+        list_result = bot.handle(bot.parse("show teams in league Parva Liga 2025/2026"))
+        schedule_result = bot.handle(bot.parse("generate schedule Parva Liga 2025/2026"))
+
+        assert "Parva Liga" in create_result
+        assert "Levski" in add_result
+        assert "Botev" in list_result
+        assert "Кръгове: 3" in schedule_result
 
 
 class TestHandlePlayersCRUD:
