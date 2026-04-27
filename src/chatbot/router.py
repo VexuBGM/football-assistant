@@ -1,8 +1,12 @@
 from .models import ParseResult
-from ..services import clubs_service, leagues_service, players_service, transfers_service
+from ..services import clubs_service, leagues_service, matches_service, players_service, transfers_service
 
 
 class ChatbotRouter:
+    def __init__(self) -> None:
+        self.current_league: dict[str, str] | None = None
+        self.current_match_id: int | None = None
+
     def handle(self, parsed: ParseResult) -> str:
         tag = parsed.intent
 
@@ -20,6 +24,14 @@ class ChatbotRouter:
                     "- show teams in league <name> <season>",
                     "- remove team <club> from league <name> <season>",
                     "- generate schedule <name> <season>",
+                    "=== Matches ===",
+                    "- select league <name> <season>",
+                    "- show round <number> <league> <season>",
+                    "- select match <match_id>",
+                    "- result <home>-<away> <X>:<Y> save",
+                    "- goal <player> <club> <minute>",
+                    "- card <player> <club> <Y|R> <minute>",
+                    "- show events [match_id]",
                     "=== Players ===",
                     "- add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>",
                     "- list players of <club> / list players",
@@ -80,6 +92,74 @@ class ChatbotRouter:
                 parsed.entities["league"],
                 parsed.entities["season"],
             )
+
+        if tag == "select_league":
+            league = leagues_service.find_league(parsed.entities["league"], parsed.entities["season"])
+            if league is None:
+                return (
+                    f'Няма лига с име "{parsed.entities["league"]}" '
+                    f'сезон {parsed.entities["season"]}.'
+                )
+            self.current_league = {
+                "name": str(league["name"]),
+                "season": str(league["season"]),
+            }
+            return (
+                f'Selected league "{self.current_league["name"]}" '
+                f'season {self.current_league["season"]}.'
+            )
+
+        if tag == "show_round":
+            return matches_service.show_round(
+                parsed.entities["league"],
+                parsed.entities["season"],
+                parsed.entities["round_no"],
+            )
+
+        if tag == "select_match":
+            match_id = parsed.entities["match_id"]
+            result = matches_service.select_match(match_id)
+            if not result.startswith("No match"):
+                self.current_match_id = match_id
+            return result
+
+        if tag == "record_result":
+            if self.current_league is None:
+                return 'Select a league first with "select league <name> <season>".'
+            entities = parsed.entities
+            return matches_service.record_result(
+                self.current_league["name"],
+                self.current_league["season"],
+                entities["home_team"],
+                entities["away_team"],
+                entities["home_goals"],
+                entities["away_goals"],
+            )
+
+        if tag == "add_goal":
+            if self.current_match_id is None:
+                return 'Select a match first with "select match <match_id>".'
+            return matches_service.add_goal_from_text(
+                self.current_match_id,
+                parsed.entities["subject"],
+                parsed.entities["minute"],
+            )
+
+        if tag == "add_card":
+            if self.current_match_id is None:
+                return 'Select a match first with "select match <match_id>".'
+            return matches_service.add_card_from_text(
+                self.current_match_id,
+                parsed.entities["subject"],
+                parsed.entities["card_type"],
+                parsed.entities["minute"],
+            )
+
+        if tag == "show_events":
+            match_id = parsed.entities.get("match_id", self.current_match_id)
+            if match_id is None:
+                return 'Select a match first with "select match <match_id>", or provide a match ID.'
+            return matches_service.show_events(match_id)
 
         if tag == "add_player":
             entities = parsed.entities

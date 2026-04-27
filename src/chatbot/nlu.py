@@ -77,6 +77,59 @@ class RegexNLU:
                     {"league": match.group(1).strip(), "season": match.group(2).strip()},
                 )
 
+            if tag == "select_league":
+                return ParseResult(
+                    "select_league",
+                    {"league": match.group(1).strip(), "season": match.group(2).strip()},
+                )
+
+            if tag == "show_round":
+                return ParseResult(
+                    "show_round",
+                    {
+                        "round_no": int(match.group(1)),
+                        "league": match.group(2).strip(),
+                        "season": match.group(3).strip(),
+                    },
+                )
+
+            if tag == "select_match":
+                return ParseResult("select_match", {"match_id": int(match.group(1))})
+
+            if tag == "record_result":
+                return ParseResult(
+                    "record_result",
+                    {
+                        "home_team": match.group(1).strip(),
+                        "away_team": match.group(2).strip(),
+                        "home_goals": int(match.group(3)),
+                        "away_goals": int(match.group(4)),
+                    },
+                )
+
+            if tag == "add_goal":
+                return ParseResult(
+                    "add_goal",
+                    {
+                        "subject": match.group(1).strip(),
+                        "minute": int(match.group(2)),
+                    },
+                )
+
+            if tag == "add_card":
+                return ParseResult(
+                    "add_card",
+                    {
+                        "subject": match.group(1).strip(),
+                        "card_type": match.group(2).strip().upper(),
+                        "minute": int(match.group(3)),
+                    },
+                )
+
+            if tag == "show_events":
+                match_id = match.group(1)
+                return ParseResult("show_events", {"match_id": int(match_id)} if match_id else {})
+
             if tag == "add_player":
                 return ParseResult(
                     "add_player",

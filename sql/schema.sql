@@ -46,11 +46,37 @@ CREATE TABLE IF NOT EXISTS matches (
   match_date TEXT,
   home_goals INTEGER,
   away_goals INTEGER,
+  status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'played')),
   FOREIGN KEY (league_id) REFERENCES leagues(id) ON DELETE CASCADE,
   FOREIGN KEY (home_club_id) REFERENCES clubs(id),
   FOREIGN KEY (away_club_id) REFERENCES clubs(id),
   CHECK (home_club_id != away_club_id),
   UNIQUE (league_id, round_no, home_club_id, away_club_id)
+);
+
+CREATE TABLE IF NOT EXISTS goals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  match_id INTEGER NOT NULL,
+  player_id INTEGER NOT NULL,
+  club_id INTEGER NOT NULL,
+  minute INTEGER NOT NULL CHECK (minute BETWEEN 1 AND 120),
+  is_own_goal INTEGER NOT NULL DEFAULT 0 CHECK (is_own_goal IN (0, 1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+  FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cards (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  match_id INTEGER NOT NULL,
+  player_id INTEGER NOT NULL,
+  club_id INTEGER NOT NULL,
+  minute INTEGER NOT NULL CHECK (minute BETWEEN 1 AND 120),
+  card_type TEXT NOT NULL CHECK (card_type IN ('Y', 'R')),
+  FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+  FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS transfers (
@@ -78,6 +104,11 @@ CREATE INDEX IF NOT EXISTS idx_league_teams_club_id ON league_teams(club_id);
 CREATE INDEX IF NOT EXISTS idx_matches_league_round ON matches(league_id, round_no);
 CREATE INDEX IF NOT EXISTS idx_matches_home_club_id ON matches(home_club_id);
 CREATE INDEX IF NOT EXISTS idx_matches_away_club_id ON matches(away_club_id);
+CREATE INDEX IF NOT EXISTS idx_matches_status ON matches(status);
+CREATE INDEX IF NOT EXISTS idx_goals_match_id ON goals(match_id);
+CREATE INDEX IF NOT EXISTS idx_goals_player_id ON goals(player_id);
+CREATE INDEX IF NOT EXISTS idx_cards_match_id ON cards(match_id);
+CREATE INDEX IF NOT EXISTS idx_cards_player_id ON cards(player_id);
 CREATE INDEX IF NOT EXISTS idx_transfers_player_id ON transfers(player_id);
 CREATE INDEX IF NOT EXISTS idx_transfers_to_club_id ON transfers(to_club_id);
 CREATE INDEX IF NOT EXISTS idx_transfers_date ON transfers(transfer_date);

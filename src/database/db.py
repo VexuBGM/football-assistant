@@ -135,6 +135,26 @@ def _copy_legacy_data(conn: sqlite3.Connection) -> None:
             conn.execute(f'DROP TABLE "{legacy_name}"')
 
 
+def _ensure_matches_status_column(conn: sqlite3.Connection) -> None:
+    columns = _column_names(conn, "matches")
+    if columns and "status" not in columns:
+        conn.execute(
+            """
+            ALTER TABLE matches
+            ADD COLUMN status TEXT NOT NULL DEFAULT 'scheduled'
+            """
+        )
+        conn.execute(
+            """
+            UPDATE matches
+            SET status = CASE
+              WHEN home_goals IS NOT NULL OR away_goals IS NOT NULL THEN 'played'
+              ELSE 'scheduled'
+            END
+            """
+        )
+
+
 def _load_schema(conn: sqlite3.Connection, schema_path: str) -> None:
     with open(schema_path, "r", encoding="utf-8") as schema_file:
         conn.executescript(schema_file.read())
@@ -153,6 +173,7 @@ def init_db(schema_path: Optional[str] = None) -> None:
         _rename_incompatible_matches_table(conn)
         _load_schema(conn, schema_path)
         _copy_legacy_data(conn)
+        _ensure_matches_status_column(conn)
         conn.commit()
     except (OSError, sqlite3.Error) as exc:
         conn.rollback()
