@@ -1,5 +1,5 @@
 from .models import ParseResult
-from ..services import clubs_service, leagues_service, matches_service, players_service, transfers_service
+from ..services import clubs_service, leagues_service, matches_service, players_service, standings_service, transfers_service
 
 
 class ChatbotRouter:
@@ -32,6 +32,9 @@ class ChatbotRouter:
                     "- goal <player> <club> <minute>",
                     "- card <player> <club> <Y|R> <minute>",
                     "- show events [match_id]",
+                    "=== Standings ===",
+                    "- show standings <league> <season>",
+                    "- Покажи класиране <лига> <сезон>",
                     "=== Players ===",
                     "- add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>",
                     "- list players of <club> / list players",
@@ -160,6 +163,12 @@ class ChatbotRouter:
             if match_id is None:
                 return 'Select a match first with "select match <match_id>", or provide a match ID.'
             return matches_service.show_events(match_id)
+
+        if tag == "show_standings":
+            return standings_service.format_standings(
+                parsed.entities["league"],
+                parsed.entities["season"],
+            )
 
         if tag == "add_player":
             entities = parsed.entities

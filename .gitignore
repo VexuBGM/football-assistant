@@ -10,6 +10,9 @@ venv/
 # Testing / coverage
 .pytest_cache/
 .pytest_tmp/
+.pytest_tmp_stage7/
+pytest_tmp_stage7/
+.test_dbs/
 .coverage
 .coverage.*
 htmlcov/

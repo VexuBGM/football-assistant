@@ -130,6 +130,12 @@ class RegexNLU:
                 match_id = match.group(1)
                 return ParseResult("show_events", {"match_id": int(match_id)} if match_id else {})
 
+            if tag == "show_standings":
+                return ParseResult(
+                    "show_standings",
+                    {"league": match.group(1).strip(), "season": match.group(2).strip()},
+                )
+
             if tag == "add_player":
                 return ParseResult(
                     "add_player",
