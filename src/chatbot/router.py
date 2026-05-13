@@ -1,4 +1,5 @@
 from .models import ParseResult
+from ..ai.ai_service import format_prediction
 from ..services import clubs_service, leagues_service, matches_service, players_service, standings_service, transfers_service
 
 
@@ -35,6 +36,9 @@ class ChatbotRouter:
                     "=== Standings ===",
                     "- show standings <league> <season>",
                     "- Покажи класиране <лига> <сезон>",
+                    "=== AI Prediction ===",
+                    "- prediction <home team> vs <away team>",
+                    "- Прогноза <отбор1> срещу <отбор2>",
                     "=== Players ===",
                     "- add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>",
                     "- list players of <club> / list players",
@@ -168,6 +172,12 @@ class ChatbotRouter:
             return standings_service.format_standings(
                 parsed.entities["league"],
                 parsed.entities["season"],
+            )
+
+        if tag == "predict_match":
+            return format_prediction(
+                parsed.entities["home_team"],
+                parsed.entities["away_team"],
             )
 
         if tag == "add_player":

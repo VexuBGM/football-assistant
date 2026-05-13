@@ -1,20 +1,24 @@
-# Football Management System (Stage 7)
+# Football Management System (Stage 8)
 
 ## Overview
 
-Football chatbot for managing clubs, leagues, players, transfer history, match operations, and league standings with Python + SQLite. The architecture is split into `chatbot -> router -> services -> repositories -> database`, with regex-based NLU, business validation, round-robin scheduling, match context selection, event tracking, standings calculated from played matches, and command logging.
+Football chatbot for managing clubs, leagues, players, transfer history, match operations, league standings, and AI match predictions with Python + SQLite. The architecture is split into `chatbot -> router -> services/ai -> repositories -> database`, with regex-based NLU, business validation, round-robin scheduling, match context selection, event tracking, standings calculated from played matches, rule-based predictions from real match data, and command logging.
 
 ## Project structure
 
 ```text
 sql/schema.sql
 src/
+  ai/
+    ai_service.py
+    features.py
   chatbot/
     __init__.py
     intents.json
     nlu.py
     router.py
   repositories/
+    ai_repo.py
     leagues_repo.py
     matches_repo.py
     standings_repo.py
@@ -65,6 +69,12 @@ docs/
 - `show standings <league> <season>`
 - `Покажи класиране <лига> <сезон>`
 
+### AI Prediction
+
+- `prediction <home team> vs <away team>`
+- `predict <home team> vs <away team>`
+- `Прогноза <отбор1> срещу <отбор2>`
+
 ### Players
 
 - `add player <name> in <club> position <GK|DF|MF|FW> number <1-99> born <date> nat <nationality>`
@@ -96,6 +106,7 @@ Bulgarian command variants are supported too, including:
 - `Картон Петър Димитров ЦСКА Y 55`
 - `Покажи събития`
 - `Покажи класиране Първа лига 2025/2026`
+- `Прогноза Левски срещу Лудогорец`
 - `Трансфер Иван Петров от Левски в Лудогорец 2026-03-10`
 - `Покажи трансфери на Иван Петров`
 
@@ -130,15 +141,85 @@ Stage 7 calculates standings directly from `matches`; points and positions are n
 
 Output columns: position, team, MP, W, D, L, GF:GA, GD, PTS.
 
-## Run
+## AI prediction workflow
 
-```bash
+Stage 8 adds a rule-based AI module:
+
+- The command is `prediction <home team> vs <away team>` or `Прогноза <отбор1> срещу <отбор2>`.
+- Both clubs must exist and must share at least one league.
+- The module uses only played matches with saved results.
+- Each team needs at least 5 played matches in the selected common league.
+- Features: last-5 form, average GF/GA, current calculated standings position, and home advantage.
+- Output: home win, draw, away win probabilities. The percentages are never negative and sum to 100%.
+
+Detailed documentation:
+
+- `docs/stage8_ai_model.md`
+- `docs/example_dialog_stage8.md`
+- `docs/stage8_test_scenarios.md`
+
+## Setup and run
+
+Run all commands from the project root:
+
+```powershell
+cd C:\footballgpt
+```
+
+If you use the included virtual environment, activate it first:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, allow it for the current terminal session and try again:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+```
+
+The app uses SQLite and creates `football_clubs.db` automatically from `sql/schema.sql`.
+If you already have an old local database and see an error like `no such column: status`,
+reset the local database before running the app:
+
+```powershell
+Remove-Item .\football_clubs.db
+```
+
+This deletes only the local generated database file. The next command recreates it with the
+current schema:
+
+```powershell
+python -m src.main
+```
+
+When the app starts, type commands at the `>` prompt. Useful first commands:
+
+```text
+help
+list clubs
+exit
+```
+
+The chatbot writes command history to `commands.log`.
+
+## Full clean run checklist
+
+Use this when starting from a fresh download or after pulling stage changes:
+
+```powershell
+cd C:\footballgpt
+.\venv\Scripts\Activate.ps1
+Remove-Item .\football_clubs.db -ErrorAction SilentlyContinue
 python -m src.main
 ```
 
 ## Tests
 
-```bash
+```powershell
+cd C:\footballgpt
+.\venv\Scripts\Activate.ps1
 python -m pytest
 ```
 

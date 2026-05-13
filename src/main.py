@@ -7,7 +7,7 @@ def main() -> None:
     init_db()
     bot = Chatbot()
 
-    print("Football Chatbot (Stage 7 - Clubs, Leagues, Players, Transfers, Matches, Standings)")
+    print("Football Chatbot (Stage 8 - Clubs, Leagues, Players, Transfers, Matches, Standings, AI Prediction)")
     print('Type "help" for commands.')
 
     while True:

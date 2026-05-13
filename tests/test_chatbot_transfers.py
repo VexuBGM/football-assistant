@@ -28,6 +28,12 @@ class TestParseTransfers:
         assert parsed.intent == "show_transfers_club"
         assert parsed.entities["name"] == "Левски"
 
+    def test_parse_show_transfers_club_english_strips_club_prefix(self):
+        parsed = _bot().parse("show transfers of club Beta")
+
+        assert parsed.intent == "show_transfers_club"
+        assert parsed.entities["name"] == "Beta"
+
 
 class TestHandleTransfers:
     def test_handle_transfer_and_history(self):

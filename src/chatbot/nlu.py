@@ -136,6 +136,15 @@ class RegexNLU:
                     {"league": match.group(1).strip(), "season": match.group(2).strip()},
                 )
 
+            if tag == "predict_match":
+                return ParseResult(
+                    "predict_match",
+                    {
+                        "home_team": match.group(1).strip(),
+                        "away_team": match.group(2).strip(),
+                    },
+                )
+
             if tag == "add_player":
                 return ParseResult(
                     "add_player",
@@ -215,6 +224,12 @@ class RegexNLU:
             if tag in {"show_transfers_player", "show_transfers_club"}:
                 target = match.group(1).strip()
                 resolved_tag = _guess_transfers_history_intent(command, target) if tag == "show_transfers_player" else tag
+                if resolved_tag == "show_transfers_club":
+                    lowered_target = target.lower()
+                    for prefix in ("club ", "клуб "):
+                        if lowered_target.startswith(prefix):
+                            target = target[len(prefix) :].strip()
+                            break
                 return ParseResult(resolved_tag, {"name": target})
 
             return ParseResult(tag, {})
