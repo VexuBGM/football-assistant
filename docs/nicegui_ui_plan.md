@@ -10,6 +10,17 @@ UI -> view models/adapters -> existing services -> repositories -> SQLite
 
 The UI should feel closer to a modern dashboard than a basic desktop form. It should support the same workflows as the chatbot, but make common operations easier to discover and safer to use.
 
+## Implementation Status
+
+Implemented first version:
+
+- `src/ui/app.py` starts the NiceGUI app at `http://127.0.0.1:8080`
+- `src/ui/layout.py` provides the sidebar, top context bar, dark-mode toggle, and shared grid helpers
+- `src/ui/adapters.py` provides structured read data for tables and panels
+- `src/ui/pages/` contains Dashboard, Clubs, Players, Leagues, Match Center, Standings, Transfers, AI Prediction, and Chatbot pages
+
+The current version is English-first in the browser while preserving the original chatbot command flow. Service calls are still used for mutations so existing validation and business rules remain centralized.
+
 ## Why NiceGUI
 
 NiceGUI is a strong fit because it lets us build browser UIs in Python while still using modern web foundations. According to the official documentation, NiceGUI apps are defined in Python, rendered in the browser with Vue, styled with Quasar/Tailwind/UnoCSS/CSS, and served through FastAPI/Uvicorn with Socket.IO updates.
