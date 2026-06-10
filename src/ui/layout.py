@@ -21,7 +21,7 @@ NAV_ITEMS = [
 
 def nav_link(path: str, label: str, icon: str, active_path: str) -> None:
     active = "fm-link-active" if active_path == path else ""
-    with ui.link(target=path).classes(f"w-full no-underline text-slate-700 {active}"):
+    with ui.link(target=path).classes(f"fm-nav-link w-full no-underline {active}"):
         with ui.row().classes("items-center gap-3 px-3 py-2 rounded-md w-full"):
             ui.icon(icon).classes("text-lg")
             ui.label(label).classes("text-sm")
@@ -30,7 +30,7 @@ def nav_link(path: str, label: str, icon: str, active_path: str) -> None:
 def page_shell(active_path: str, title: str, subtitle: str | None, content: Callable[[], None]) -> None:
     apply_theme()
 
-    with ui.header().classes("bg-white text-slate-900 border-b border-slate-200 px-4"):
+    with ui.header().classes("fm-shell border-b px-4"):
         with ui.row().classes("items-center justify-between w-full"):
             with ui.row().classes("items-center gap-3"):
                 ui.icon("sports_soccer").classes("text-primary text-2xl")
@@ -42,10 +42,11 @@ def page_shell(active_path: str, title: str, subtitle: str | None, content: Call
                     if state.match_id:
                         context += f" | match #{state.match_id}"
                     ui.label(context).classes("text-xs fm-muted")
-            dark = ui.dark_mode()
-            ui.switch("Dark", value=False, on_change=lambda event: dark.set_value(event.value)).props("dense")
+            ui.button("Theme", icon="dark_mode", on_click=lambda: ui.run_javascript("window.FMTheme.toggle()")).props(
+                "flat dense"
+            ).tooltip("Toggle light or dark theme")
 
-    with ui.left_drawer().classes("bg-white border-r border-slate-200 px-3 py-4"):
+    with ui.left_drawer().classes("fm-shell border-r px-3 py-4"):
         ui.label("Navigation").classes("uppercase text-xs tracking-wide fm-muted px-3 mb-2")
         for path, label, icon in NAV_ITEMS:
             nav_link(path, label, icon, active_path)

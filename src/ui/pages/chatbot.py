@@ -18,7 +18,7 @@ def chatbot_page() -> None:
                 return
             for role, text in messages[-20:]:
                 align = "items-end" if role == "You" else "items-start"
-                color = "bg-blue-50" if role == "You" else "bg-slate-100"
+                color = "fm-chat-user" if role == "You" else "fm-chat-bot"
                 with ui.column().classes(f"{align} w-full"):
                     ui.label(role).classes("text-xs fm-muted")
                     ui.label(text).classes(f"{color} rounded-md px-3 py-2 whitespace-pre-wrap max-w-3xl")

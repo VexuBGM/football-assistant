@@ -84,7 +84,7 @@ def matches_page() -> None:
                 ui.label("No goals or cards recorded yet.").classes("fm-muted")
             for event in events:
                 with ui.row().classes("items-center gap-2"):
-                    color = "text-green-700" if event["event_type"] == "goal" else "text-amber-700"
+                    color = "fm-goal" if event["event_type"] == "goal" else "fm-card-event"
                     ui.label(f'{event["minute"]}\'').classes("font-bold w-10")
                     ui.icon("sports_soccer" if event["event_type"] == "goal" else "style").classes(color)
                     ui.label(f'{event["label"]}: {event["player_name"]} ({event["club_name"]})')
