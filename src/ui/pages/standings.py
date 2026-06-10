@@ -16,7 +16,7 @@ def standings_page() -> None:
             adapters.league_options(),
             value=selected_value,
             label="League",
-        ).props("outlined dense").classes("w-80")
+        ).props("outlined dense").classes("w-96 max-w-full")
 
         @ui.refreshable
         def standings_table() -> None:
@@ -55,7 +55,7 @@ def standings_page() -> None:
         league_select.on("update:model-value", lambda _: standings_table.refresh())
 
         with section("Calculated Standings", "Only played matches with saved scores are counted"):
-            with ui.row().classes("gap-2 items-end"):
+            with ui.row().classes("fm-toolbar gap-2 items-end flex-wrap"):
                 league_select
                 ui.button("Use As Context", icon="check", on_click=use_context)
                 ui.button("Refresh", icon="refresh", on_click=lambda: standings_table.refresh())

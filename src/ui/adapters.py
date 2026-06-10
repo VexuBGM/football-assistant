@@ -61,6 +61,11 @@ def club_options() -> list[str]:
     return [row["name"] for row in list_clubs()]
 
 
+def club_options_for_league(league_name: str | None, season: str | None) -> list[str]:
+    teams = list_league_teams(league_name, season)
+    return [row["name"] for row in teams]
+
+
 def list_players(club_name: str | None = None) -> list[dict[str, Any]]:
     params: tuple[Any, ...] = ()
     where = ""
@@ -111,6 +116,26 @@ def list_leagues() -> list[dict[str, Any]]:
 
 def league_options() -> list[str]:
     return [f'{row["name"]} | {row["season"]}' for row in list_leagues()]
+
+
+def prediction_league_options() -> list[str]:
+    return [
+        f'{row["name"]} | {row["season"]}'
+        for row in _rows(
+            """
+            SELECT
+              l.name,
+              l.season,
+              COUNT(m.id) AS played_matches
+            FROM leagues l
+            JOIN matches m ON m.league_id = l.id
+            WHERE m.status = 'played'
+            GROUP BY l.id
+            HAVING played_matches > 0
+            ORDER BY l.season DESC, l.name ASC
+            """
+        )
+    ]
 
 
 def parse_league_option(option: str | None) -> tuple[str | None, str | None]:
@@ -220,6 +245,38 @@ def standings_rows(league_name: str | None, season: str | None) -> tuple[list[di
     ], None
 
 
+def suggested_prediction_pair(league_name: str | None, season: str | None) -> tuple[str | None, str | None]:
+    if not league_name or not season:
+        return None, None
+
+    rows = _rows(
+        """
+        SELECT
+          c.name,
+          COUNT(m.id) AS played_matches
+        FROM leagues l
+        JOIN league_teams lt ON lt.league_id = l.id
+        JOIN clubs c ON c.id = lt.club_id
+        LEFT JOIN matches m
+          ON m.league_id = l.id
+         AND m.status = 'played'
+         AND (m.home_club_id = c.id OR m.away_club_id = c.id)
+        WHERE l.name = ? AND l.season = ?
+        GROUP BY c.id
+        HAVING played_matches >= 5
+        ORDER BY played_matches DESC, c.name ASC
+        LIMIT 2
+        """,
+        (league_name, season),
+    )
+    if len(rows) < 2:
+        teams = club_options_for_league(league_name, season)
+        if len(teams) < 2:
+            return None, None
+        return teams[0], teams[1]
+    return rows[0]["name"], rows[1]["name"]
+
+
 def list_transfers() -> list[dict[str, Any]]:
     return _rows(
         """
@@ -251,8 +308,8 @@ def prediction_view(home: str, away: str) -> tuple[dict[str, Any] | None, str | 
         "home_win": prediction.home_win,
         "draw": prediction.draw,
         "away_win": prediction.away_win,
-        "home_form": prediction.features.home.last5_points,
-        "away_form": prediction.features.away.last5_points,
-        "home_rank": prediction.features.home.standings_position,
-        "away_rank": prediction.features.away.standings_position,
+        "home_form": prediction.features.home.last_five_points,
+        "away_form": prediction.features.away.last_five_points,
+        "home_rank": prediction.features.home.standing_position,
+        "away_rank": prediction.features.away.standing_position,
     }, None

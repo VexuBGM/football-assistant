@@ -91,7 +91,7 @@ def clubs_page() -> None:
             refresh_all()
 
         with section("Clubs", "Create, inspect, and delete football clubs"):
-            with ui.row().classes("gap-2"):
+            with ui.row().classes("fm-toolbar gap-2 flex-wrap"):
                 ui.button("Add Club", icon="add", on_click=lambda: dialog.open())
                 ui.button("Edit Club", icon="edit", on_click=lambda: edit_dialog.open())
                 delete_id = ui.input("Delete by name or ID").props("dense outlined").classes("w-64")

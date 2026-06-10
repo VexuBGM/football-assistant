@@ -95,7 +95,7 @@ def transfers_page() -> None:
                 to_club = ui.select(adapters.club_options(), label="To club").props("outlined").classes("w-full")
                 date = ui.input("Date", value="2026-01-01").props("outlined").classes("w-full")
                 fee = ui.number("Fee", min=0, step=1000, format="%.0f").props("outlined").classes("w-full")
-                with ui.row().classes("gap-2"):
+                with ui.row().classes("fm-toolbar gap-2 flex-wrap"):
                     ui.button("Complete Transfer", icon="swap_horiz", on_click=transfer)
                     ui.button("Seed Transfers", icon="data_array", color="secondary", on_click=seed_transfers)
 

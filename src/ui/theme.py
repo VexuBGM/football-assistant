@@ -140,10 +140,12 @@ def apply_theme() -> None:
         .fm-grid {
           height: 520px;
           width: 100%;
+          min-width: 0;
         }
         .fm-small-grid {
           height: 340px;
           width: 100%;
+          min-width: 0;
         }
         .fm-grid,
         .fm-small-grid {
@@ -169,6 +171,17 @@ def apply_theme() -> None:
         .fm-small-grid .ag-center-cols-viewport {
           background: var(--fm-surface-raised);
           color: var(--fm-text);
+        }
+        .fm-grid .ag-root-wrapper,
+        .fm-small-grid .ag-root-wrapper {
+          width: 100%;
+        }
+        .fm-grid .ag-cell,
+        .fm-small-grid .ag-cell,
+        .fm-grid .ag-header-cell-text,
+        .fm-small-grid .ag-header-cell-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .fm-grid .ag-header,
         .fm-small-grid .ag-header,
@@ -215,6 +228,16 @@ def apply_theme() -> None:
         .q-field__prefix,
         .q-field__suffix {
           color: var(--fm-text);
+        }
+        .q-menu {
+          min-width: min(22rem, calc(100vw - 2rem));
+        }
+        .fm-toolbar {
+          width: 100%;
+          min-width: 0;
+        }
+        .fm-toolbar .q-field {
+          flex-shrink: 0;
         }
         """
     )

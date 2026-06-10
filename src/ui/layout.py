@@ -65,7 +65,7 @@ def page_shell(active_path: str, title: str, subtitle: str | None, content: Call
 
 
 def section(title: str, subtitle: str | None = None):
-    panel = ui.column().classes("fm-panel p-4 gap-3")
+    panel = ui.column().classes("fm-panel p-4 gap-3 w-full min-w-0")
     with panel:
         with ui.row().classes("items-start justify-between w-full"):
             with ui.column().classes("gap-0"):
@@ -76,16 +76,24 @@ def section(title: str, subtitle: str | None = None):
 
 
 def grid(column_defs: list[dict], row_data: list[dict], small: bool = False):
+    normalized_columns = []
+    for column in column_defs:
+        normalized = {"minWidth": 90, **column}
+        if "width" not in normalized and "flex" not in normalized:
+            normalized["flex"] = 1
+        normalized_columns.append(normalized)
+
     return ui.aggrid(
         {
             "defaultColDef": {
                 "sortable": True,
                 "filter": True,
                 "resizable": True,
+                "minWidth": 90,
             },
-            "columnDefs": column_defs,
+            "columnDefs": normalized_columns,
             "rowData": row_data,
             "rowSelection": "single",
             "animateRows": True,
         }
-    ).classes("fm-small-grid" if small else "fm-grid")
+    ).classes(("fm-small-grid" if small else "fm-grid") + " min-w-0")

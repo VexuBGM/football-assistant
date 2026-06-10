@@ -1,49 +1,101 @@
 from nicegui import ui
 
+from ...services import seed_service
 from .. import adapters
 from ..layout import grid, page_shell, section
+from ..notifications import notify_and_log
 from ..state import state
 
 
 @ui.page("/")
 def dashboard_page() -> None:
     def content() -> None:
-        counts = adapters.dashboard_counts()
-        with ui.grid(columns="repeat(auto-fit, minmax(160px, 1fr))").classes("gap-3 w-full"):
-            for label, value, icon in [
-                ("Clubs", counts["clubs"], "shield"),
-                ("Players", counts["players"], "groups"),
-                ("Leagues", counts["leagues"], "emoji_events"),
-                ("Scheduled", counts["scheduled_matches"], "event"),
-                ("Played", counts["played_matches"], "check_circle"),
-                ("Transfers", counts["transfers"], "swap_horiz"),
-            ]:
-                with ui.column().classes("fm-panel fm-stat p-4 gap-1"):
-                    with ui.row().classes("items-center justify-between w-full"):
-                        ui.label(label).classes("fm-muted text-sm")
-                        ui.icon(icon).classes("text-primary")
-                    ui.label(str(value)).classes("text-3xl font-bold")
+        @ui.refreshable
+        def stats() -> None:
+            counts = adapters.dashboard_counts()
+            with ui.grid(columns="repeat(auto-fit, minmax(160px, 1fr))").classes("gap-3 w-full"):
+                for label, value, icon in [
+                    ("Clubs", counts["clubs"], "shield"),
+                    ("Players", counts["players"], "groups"),
+                    ("Leagues", counts["leagues"], "emoji_events"),
+                    ("Scheduled", counts["scheduled_matches"], "event"),
+                    ("Played", counts["played_matches"], "check_circle"),
+                    ("Transfers", counts["transfers"], "swap_horiz"),
+                ]:
+                    with ui.column().classes("fm-panel fm-stat p-4 gap-1"):
+                        with ui.row().classes("items-center justify-between w-full"):
+                            ui.label(label).classes("fm-muted text-sm")
+                            ui.icon(icon).classes("text-primary")
+                        ui.label(str(value)).classes("text-3xl font-bold")
+
+        @ui.refreshable
+        def recent_results_panel() -> None:
+            rows = adapters.recent_results()
+            if not rows:
+                ui.label("No results yet. Use Match Center to save one.").classes("fm-muted")
+            else:
+                grid(
+                    [
+                        {"field": "id", "headerName": "ID", "width": 80},
+                        {"field": "league", "headerName": "League"},
+                        {"field": "season", "headerName": "Season", "width": 120},
+                        {"field": "round_no", "headerName": "Round", "width": 100},
+                        {"field": "home", "headerName": "Home"},
+                        {"field": "home_goals", "headerName": "HG", "width": 80},
+                        {"field": "away_goals", "headerName": "AG", "width": 80},
+                        {"field": "away", "headerName": "Away"},
+                    ],
+                    rows,
+                    small=True,
+                )
+
+        def seed_all() -> None:
+            result = seed_service.seed_full_demo_data()
+            notify_and_log("ui seed full demo data", "ui_seed_full_demo_data", {}, result)
+            stats.refresh()
+            recent_results_panel.refresh()
+            seed_info.refresh()
+
+        def clear_all() -> None:
+            result = seed_service.clear_database()
+            state.league_name = None
+            state.season = None
+            state.match_id = None
+            notify_and_log("ui clear database", "ui_clear_database", {}, result)
+            stats.refresh()
+            recent_results_panel.refresh()
+            seed_info.refresh()
+            clear_dialog.close()
+
+        @ui.refreshable
+        def seed_info() -> None:
+            summary = seed_service.seed_summary()
+            ui.label(f'Played data: {summary["played_league"]}').classes("text-sm")
+            ui.label(f'Sandbox fixtures: {summary["sandbox_league"]}').classes("text-sm")
+            ui.label(
+                f'{summary["played_matches"]} played matches, {summary["scheduled_matches"]} scheduled matches'
+            ).classes("text-sm fm-muted")
+
+        with section("Demo Data", "Seed a complete test database for clubs, players, transfers, matches, standings, and AI"):
+            with ui.row().classes("items-center gap-2"):
+                ui.button("Seed Full Demo Data", icon="database", color="secondary", on_click=seed_all)
+                ui.button("Clear Database", icon="delete_forever", color="negative", on_click=lambda: clear_dialog.open())
+                ui.button("Open Match Center", icon="sports_soccer", on_click=lambda: ui.navigate.to("/matches"))
+                ui.button("Open AI Prediction", icon="insights", on_click=lambda: ui.navigate.to("/prediction"))
+            seed_info()
+
+        with ui.dialog() as clear_dialog, ui.card().classes("w-96"):
+            ui.label("Clear database?").classes("text-lg font-bold")
+            ui.label("This removes all clubs, players, leagues, matches, events, and transfers.").classes("fm-muted")
+            with ui.row().classes("justify-end gap-2 w-full"):
+                ui.button("Cancel", on_click=clear_dialog.close).props("flat")
+                ui.button("Clear Database", icon="delete_forever", color="negative", on_click=clear_all)
+
+        stats()
 
         with ui.grid(columns="2fr 1fr").classes("gap-4 w-full max-lg:grid-cols-1"):
             with section("Recent Results", "Latest played matches saved in the database"):
-                rows = adapters.recent_results()
-                if not rows:
-                    ui.label("No results yet. Use Match Center to save one.").classes("fm-muted")
-                else:
-                    grid(
-                        [
-                            {"field": "id", "headerName": "ID", "width": 80},
-                            {"field": "league", "headerName": "League"},
-                            {"field": "season", "headerName": "Season", "width": 120},
-                            {"field": "round_no", "headerName": "Round", "width": 100},
-                            {"field": "home", "headerName": "Home"},
-                            {"field": "home_goals", "headerName": "HG", "width": 80},
-                            {"field": "away_goals", "headerName": "AG", "width": 80},
-                            {"field": "away", "headerName": "Away"},
-                        ],
-                        rows,
-                        small=True,
-                    )
+                recent_results_panel()
 
             with section("Working Context", "The selected league and match drive Match Center actions"):
                 ui.label(state.league_name or "No league selected").classes("text-xl font-bold")

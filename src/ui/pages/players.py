@@ -9,7 +9,9 @@ from ..notifications import notify_and_log
 @ui.page("/players")
 def players_page() -> None:
     def content() -> None:
-        club_filter = ui.select(["All", *adapters.club_options()], value="All", label="Club filter").props("outlined dense")
+        club_filter = ui.select(["All", *adapters.club_options()], value="All", label="Club filter").props(
+            "outlined dense"
+        ).classes("w-80 max-w-full")
 
         @ui.refreshable
         def table() -> None:
@@ -97,7 +99,7 @@ def players_page() -> None:
             refresh_all()
 
         with section("Players", "Filter squads, add footballers, and update their status"):
-            with ui.row().classes("gap-2 items-end"):
+            with ui.row().classes("fm-toolbar gap-2 items-end flex-wrap"):
                 ui.button("Add Player", icon="person_add", on_click=lambda: add_dialog.open())
                 ui.button("Edit Player", icon="edit", on_click=lambda: edit_dialog.open())
                 ui.button("Seed Players", icon="data_array", color="secondary", on_click=seed_players)

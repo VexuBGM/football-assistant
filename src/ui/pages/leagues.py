@@ -10,7 +10,7 @@ from ..state import state
 @ui.page("/leagues")
 def leagues_page() -> None:
     def content() -> None:
-        selected = ui.select(adapters.league_options(), label="League").props("outlined dense").classes("w-80")
+        selected = ui.select(adapters.league_options(), label="League").props("outlined dense").classes("w-96 max-w-full")
 
         @ui.refreshable
         def leagues_table() -> None:
@@ -106,19 +106,21 @@ def leagues_page() -> None:
 
         with ui.grid(columns="1fr 1fr").classes("gap-4 w-full max-lg:grid-cols-1"):
             with section("Leagues", "Create competitions and inspect their schedule readiness"):
-                with ui.row().classes("gap-2"):
+                with ui.row().classes("fm-toolbar gap-2 flex-wrap"):
                     ui.button("Create League", icon="add", on_click=lambda: create_dialog.open())
                     ui.button("Use As Context", icon="check", on_click=use_context)
                 leagues_table()
 
             with section("League Teams", "Add or remove clubs before generating a schedule"):
                 selected
-                with ui.row().classes("gap-2 items-end"):
-                    team_add = ui.select(adapters.club_options(), label="Add team").props("outlined dense").classes("w-56")
+                with ui.row().classes("fm-toolbar gap-2 items-end flex-wrap"):
+                    team_add = ui.select(adapters.club_options(), label="Add team").props("outlined dense").classes(
+                        "w-64 max-w-full"
+                    )
                     ui.button("Add", icon="add", on_click=add_team)
-                with ui.row().classes("gap-2 items-end"):
+                with ui.row().classes("fm-toolbar gap-2 items-end flex-wrap"):
                     team_remove = ui.select(adapters.club_options(), label="Remove team").props("outlined dense").classes(
-                        "w-56"
+                        "w-64 max-w-full"
                     )
                     ui.button("Remove", icon="remove", color="warning", on_click=remove_team)
                 ui.button("Generate Schedule", icon="event", on_click=generate)
