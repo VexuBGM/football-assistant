@@ -4,6 +4,8 @@
 
 Football chatbot for managing clubs, leagues, players, transfer history, match operations, league standings, and AI match predictions with Python + SQLite. The architecture is split into `chatbot -> router -> services/ai -> repositories -> database`, with regex-based NLU, business validation, round-robin scheduling, match context selection, event tracking, standings calculated from played matches, rule-based predictions from real match data, and command logging.
 
+The project also includes a NiceGUI browser dashboard that presents the same completed workflows through a visual interface: clubs, players, leagues, Match Center, standings, transfers, AI prediction, and the original chatbot.
+
 ## Project structure
 
 ```text
@@ -33,6 +35,11 @@ src/
     transfers_service.py
   utils/
     logger.py
+  ui/
+    app.py
+    adapters.py
+    layout.py
+    pages/
   main.py
 tests/
 docs/
@@ -203,6 +210,34 @@ exit
 ```
 
 The chatbot writes command history to `commands.log`.
+
+## NiceGUI browser app
+
+The visual interface runs locally in the browser and reuses the same service-layer validation as the chatbot.
+
+```powershell
+cd C:\School\football-agent
+.\.venv\Scripts\Activate.ps1
+python -m src.ui.app
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8080
+```
+
+The GUI includes:
+
+- Dashboard with database counts and recent results
+- Clubs and players management, including club editing and player seed data
+- League team management and schedule generation
+- Match Center for round selection, result entry, goals, cards, and event review
+- Calculated standings
+- Transfer history, player/club history lookup, transfer form, and transfer seed data
+- AI match prediction with probability bars
+- Original chatbot page for command-based demos
+- UI actions are also written to `commands.log`
 
 ## Full clean run checklist
 
