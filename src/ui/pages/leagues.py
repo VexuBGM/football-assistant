@@ -3,7 +3,7 @@ from nicegui import ui
 from ...services import leagues_service
 from .. import adapters
 from ..layout import grid, page_shell, section
-from ..notifications import notify_result
+from ..notifications import notify_and_log
 from ..state import state
 
 
@@ -50,33 +50,59 @@ def leagues_page() -> None:
 
         def create() -> None:
             result = leagues_service.create_league(league_name.value, league_season.value)
-            notify_result(result)
+            notify_and_log(
+                f"ui create league {league_name.value} {league_season.value}",
+                "ui_create_league",
+                {"name": league_name.value, "season": league_season.value},
+                result,
+            )
             create_dialog.close()
             refresh_all()
 
         def add_team() -> None:
             name, season = adapters.parse_league_option(selected.value)
             result = leagues_service.add_team_to_league(team_add.value or "", name or "", season or "")
-            notify_result(result)
+            notify_and_log(
+                f"ui add team {team_add.value} to league {name} {season}",
+                "ui_add_team_to_league",
+                {"club": team_add.value, "league": name, "season": season},
+                result,
+            )
             refresh_all()
 
         def remove_team() -> None:
             name, season = adapters.parse_league_option(selected.value)
             result = leagues_service.remove_team_from_league(team_remove.value or "", name or "", season or "")
-            notify_result(result)
+            notify_and_log(
+                f"ui remove team {team_remove.value} from league {name} {season}",
+                "ui_remove_team_from_league",
+                {"club": team_remove.value, "league": name, "season": season},
+                result,
+            )
             refresh_all()
 
         def generate() -> None:
             name, season = adapters.parse_league_option(selected.value)
             result = leagues_service.generate_schedule(name or "", season or "")
-            notify_result(result)
+            notify_and_log(
+                f"ui generate schedule {name} {season}",
+                "ui_generate_schedule",
+                {"league": name, "season": season},
+                result,
+            )
             refresh_all()
 
         def use_context() -> None:
             name, season = adapters.parse_league_option(selected.value)
             state.league_name = name
             state.season = season
-            notify_result(f"Selected {name} {season} as working context.")
+            result = f"Selected {name} {season} as working context."
+            notify_and_log(
+                f"ui select league context {name} {season}",
+                "ui_select_league_context",
+                {"league": name, "season": season},
+                result,
+            )
 
         with ui.grid(columns="1fr 1fr").classes("gap-4 w-full max-lg:grid-cols-1"):
             with section("Leagues", "Create competitions and inspect their schedule readiness"):

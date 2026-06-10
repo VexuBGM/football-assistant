@@ -2,7 +2,7 @@ from nicegui import ui
 
 from .. import adapters
 from ..layout import grid, page_shell, section
-from ..notifications import notify_result
+from ..notifications import notify_and_log
 from ..state import state
 
 
@@ -44,7 +44,13 @@ def standings_page() -> None:
             name, season = adapters.parse_league_option(league_select.value)
             state.league_name = name
             state.season = season
-            notify_result(f"Selected {name} {season} as working context.")
+            result = f"Selected {name} {season} as working context."
+            notify_and_log(
+                f"ui select standings context {name} {season}",
+                "ui_select_standings_context",
+                {"league": name, "season": season},
+                result,
+            )
 
         league_select.on("update:model-value", lambda _: standings_table.refresh())
 

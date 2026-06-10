@@ -230,13 +230,14 @@ http://127.0.0.1:8080
 The GUI includes:
 
 - Dashboard with database counts and recent results
-- Clubs and players management
+- Clubs and players management, including club editing and player seed data
 - League team management and schedule generation
 - Match Center for round selection, result entry, goals, cards, and event review
 - Calculated standings
-- Transfer history and transfer form
+- Transfer history, player/club history lookup, transfer form, and transfer seed data
 - AI match prediction with probability bars
 - Original chatbot page for command-based demos
+- UI actions are also written to `commands.log`
 
 ## Full clean run checklist
 

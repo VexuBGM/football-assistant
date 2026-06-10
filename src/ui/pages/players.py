@@ -3,7 +3,7 @@ from nicegui import ui
 from ...services import players_service
 from .. import adapters
 from ..layout import grid, page_shell, section
-from ..notifications import notify_result
+from ..notifications import notify_and_log
 
 
 @ui.page("/players")
@@ -30,6 +30,11 @@ def players_page() -> None:
 
         club_filter.on("update:model-value", lambda _: table.refresh())
 
+        def refresh_all() -> None:
+            table.refresh()
+            edit_name.options = adapters.player_options()
+            edit_name.update()
+
         def add_player() -> None:
             result = players_service.add_player(
                 player_name.value,
@@ -39,9 +44,21 @@ def players_page() -> None:
                 player_birth.value,
                 player_nat.value,
             )
-            notify_result(result)
+            notify_and_log(
+                f"ui add player {player_name.value}",
+                "ui_add_player",
+                {
+                    "full_name": player_name.value,
+                    "club": player_club.value,
+                    "position": player_position.value,
+                    "number": player_number.value,
+                    "birth_date": player_birth.value,
+                    "nationality": player_nat.value,
+                },
+                result,
+            )
             add_dialog.close()
-            table.refresh()
+            refresh_all()
 
         def update_player() -> None:
             result = players_service.update_player(
@@ -50,23 +67,46 @@ def players_page() -> None:
                 number=int(edit_number.value) if edit_number.value is not None else None,
                 status=edit_status.value or None,
             )
-            notify_result(result)
+            notify_and_log(
+                f"ui update player {edit_name.value}",
+                "ui_update_player",
+                {
+                    "player_name": edit_name.value,
+                    "position": edit_position.value,
+                    "number": edit_number.value,
+                    "status": edit_status.value,
+                },
+                result,
+            )
             edit_dialog.close()
-            table.refresh()
+            refresh_all()
+
+        def delete_player() -> None:
+            result = players_service.delete_player(delete_id.value or "")
+            notify_and_log(
+                f"ui delete player {delete_id.value}",
+                "ui_delete_player",
+                {"identifier": delete_id.value},
+                result,
+            )
+            refresh_all()
+
+        def seed_players() -> None:
+            result = players_service.seed_test_data()
+            notify_and_log("ui seed players", "ui_seed_players", {}, result)
+            refresh_all()
 
         with section("Players", "Filter squads, add footballers, and update their status"):
             with ui.row().classes("gap-2 items-end"):
                 ui.button("Add Player", icon="person_add", on_click=lambda: add_dialog.open())
                 ui.button("Edit Player", icon="edit", on_click=lambda: edit_dialog.open())
+                ui.button("Seed Players", icon="data_array", color="secondary", on_click=seed_players)
                 delete_id = ui.input("Delete by name or ID").props("dense outlined").classes("w-64")
                 ui.button(
                     "Delete",
                     icon="delete",
                     color="negative",
-                    on_click=lambda: (
-                        notify_result(players_service.delete_player(delete_id.value or "")),
-                        table.refresh(),
-                    ),
+                    on_click=delete_player,
                 )
             table()
 

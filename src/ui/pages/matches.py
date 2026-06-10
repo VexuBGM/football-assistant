@@ -3,7 +3,7 @@ from nicegui import ui
 from ...services import matches_service
 from .. import adapters
 from ..layout import grid, page_shell, section
-from ..notifications import notify_result
+from ..notifications import notify_and_log
 from ..state import state
 
 
@@ -100,14 +100,25 @@ def matches_page() -> None:
             max_value = adapters.max_round(name, season)
             round_select.max = max_value
             round_select.update()
-            notify_result(f"Selected {name} {season}.")
+            result = f"Selected {name} {season}."
+            notify_and_log(
+                f"ui select league {name} {season}",
+                "ui_select_league",
+                {"league": name, "season": season},
+                result,
+            )
             refresh_workflow()
 
         def select_match(match_id: int) -> None:
             result = matches_service.select_match(int(match_id))
             if not result.startswith("No match"):
                 state.match_id = int(match_id)
-            notify_result(result)
+            notify_and_log(
+                f"ui select match {match_id}",
+                "ui_select_match",
+                {"match_id": match_id},
+                result,
+            )
             detail_panel.refresh()
 
         def save_result(match: dict, home_goals: int, away_goals: int) -> None:
@@ -119,23 +130,55 @@ def matches_page() -> None:
                 home_goals,
                 away_goals,
             )
-            notify_result(result)
+            notify_and_log(
+                f'ui result {match["home_name"]}-{match["away_name"]} {home_goals}:{away_goals} save',
+                "ui_record_result",
+                {
+                    "league": match["league_name"],
+                    "season": match["league_season"],
+                    "home_team": match["home_name"],
+                    "away_team": match["away_name"],
+                    "home_goals": home_goals,
+                    "away_goals": away_goals,
+                },
+                result,
+            )
             refresh_workflow()
 
         def add_goal(player: str, club: str, minute: int) -> None:
             if state.match_id is None:
-                notify_result("Select a match first.")
+                notify_and_log(
+                    "ui add goal without selected match",
+                    "ui_add_goal",
+                    {"player": player, "club": club, "minute": minute},
+                    "Select a match first.",
+                )
                 return
             result = matches_service.add_goal(state.match_id, player or "", club or "", minute)
-            notify_result(result)
+            notify_and_log(
+                f"ui goal {player} {club} {minute}",
+                "ui_add_goal",
+                {"match_id": state.match_id, "player": player, "club": club, "minute": minute},
+                result,
+            )
             detail_panel.refresh()
 
         def add_card(player: str, club: str, card_type: str, minute: int) -> None:
             if state.match_id is None:
-                notify_result("Select a match first.")
+                notify_and_log(
+                    "ui add card without selected match",
+                    "ui_add_card",
+                    {"player": player, "club": club, "card_type": card_type, "minute": minute},
+                    "Select a match first.",
+                )
                 return
             result = matches_service.add_card(state.match_id, player or "", club or "", card_type or "Y", minute)
-            notify_result(result)
+            notify_and_log(
+                f"ui card {player} {club} {card_type} {minute}",
+                "ui_add_card",
+                {"match_id": state.match_id, "player": player, "club": club, "card_type": card_type, "minute": minute},
+                result,
+            )
             detail_panel.refresh()
 
         league_select.on("update:model-value", lambda _: select_league())

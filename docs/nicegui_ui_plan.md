@@ -18,6 +18,7 @@ Implemented first version:
 - `src/ui/layout.py` provides the sidebar, top context bar, dark-mode toggle, and shared grid helpers
 - `src/ui/adapters.py` provides structured read data for tables and panels
 - `src/ui/pages/` contains Dashboard, Clubs, Players, Leagues, Match Center, Standings, Transfers, AI Prediction, and Chatbot pages
+- Dedicated UI coverage now includes club editing, player/transfer seed helpers, player-specific and club-specific transfer history lookup, and UI action logging to `commands.log`
 
 The current version is English-first in the browser while preserving the original chatbot command flow. Service calls are still used for mutations so existing validation and business rules remain centralized.
 

@@ -2,7 +2,7 @@ from nicegui import ui
 
 from .. import adapters
 from ..layout import page_shell, section
-from ..notifications import notify_result
+from ..notifications import notify_and_log
 
 
 @ui.page("/prediction")
@@ -37,7 +37,19 @@ def prediction_page() -> None:
                 ).classes("text-sm")
 
         def predict() -> None:
-            notify_result("Prediction calculated.")
+            prediction, error = adapters.prediction_view(home.value or "", away.value or "")
+            result = error or (
+                f'Prediction calculated: {prediction["home_win"]}% home, '
+                f'{prediction["draw"]}% draw, {prediction["away_win"]}% away.'
+                if prediction is not None
+                else "Prediction failed."
+            )
+            notify_and_log(
+                f"ui prediction {home.value} vs {away.value}",
+                "ui_predict_match",
+                {"home_team": home.value, "away_team": away.value},
+                result,
+            )
             render_prediction()
 
         with ui.grid(columns="1fr 1.4fr").classes("gap-4 w-full max-lg:grid-cols-1"):
